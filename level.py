@@ -17,6 +17,7 @@ HEIGHT=525
 
 tile_colors=[LIGHT_BLUE,GREEN,LIGHT_GREEN,GRAY]
 ORIGIN=(300,250)#center
+from Assets import *
 from entities import *
 
 class Camera:
@@ -35,17 +36,30 @@ class Camera:
 
 
 class Tile:
-	def __init__(self,tile_x,tile_y,color,solid=False):
+	def __init__(self,tile_x,tile_y,source_rect,ASSETS,solid=False):
+		self.texture=ASSETS.crop(source_rect)
+		self.texture.set_colorkey(BLACK)
+		self.tempRect=self.texture.get_rect()
 		self.size=32
 		self.x=tile_x*self.size
 		self.y=tile_y*self.size
-		self.color=color
 		self.solid=solid
+		self.bounds=Rect(self.x,self.y,self.size,self.size)
+
+
 
 	def render(self,display,off):
-		bounds=Rect(self.x-off[0],self.y-off[1],self.size,self.size)
-		draw.rect(display,self.color,bounds)
-		draw.rect(display,(0,0,0),bounds,1)
+		x0=self.x
+		y0=self.y
+		x1=x0+self.size/2
+		y1=y0+self.size/2
+
+		display.blit(self.texture,(x0-off[0],y0-off[1]))
+		display.blit(self.texture,(x1-off[0],y0-off[1]))
+		display.blit(self.texture,(x1-off[0],y1-off[1]))
+		display.blit(self.texture,(x0-off[0],y1-off[1]))
+
+
 
 	
 
@@ -53,19 +67,23 @@ class Level:
 	def __init__(self,tileWidth,tileHeight):
 		self.w=tileWidth
 		self.h=tileHeight
-		self.tiles=self.createTiles()
 		self.camera=Camera()
-		self.entities=self.createEntities(15)
+		self.assetsManager=AssetsManager('playersheet.png')
+		self.tileManager=AssetsManager('tileset.png')
+		self.tiles=self.createTiles()
+		self.entities=self.createEntities(10)
 
 	def createEntities(self,len):
 		entities=[0]*len
-		entities[0]=Player(9,8,LIGHT_YELLOW)
-		entities[1]=Mob(10,10,WHITE)
+		entities[0]=Player(9,8,(0,0,64,64),self.assetsManager)
+		entities[1]=Mob(10,10,(0,0,64,64),self.assetsManager)
 		for x in range(2,len):
 			xx=randrange(int(WIDTH/32))
 			yy=randrange(int(HEIGHT/32))
-			entities[x]=Entity(xx,yy,PINK)
+			entities[x]=Entity(xx,yy,(0,0,64,64),self.assetsManager)
 		return entities
+
+
 
 
 	def add_to_entities(self,entity,index):
@@ -81,7 +99,7 @@ class Level:
 		tiles=self.create2DArray(self.w,self.h)
 		for y in range(self.h):
 			for x in range(self.w):
-				tiles[y][x]=Tile(x,y,LIGHT_GREEN)
+				tiles[y][x]=Tile(x,y,(16*4,16*2,16,16),self.tileManager)
 
 		return tiles
 

@@ -1,0 +1,10 @@
+ideas:
+	->textures
+	->player animation
+	->health,running
+	->first pokemon and ability to hold them
+	->inventory
+	->npc,spawn random npc with inventory on map
+	->save map
+
+

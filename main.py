@@ -3,7 +3,6 @@ import sys
 import os
 from pygame import *
 from random import randrange
-
 import time
 import math
 
@@ -12,11 +11,9 @@ HEIGHT=525
 # player origin-> //center//9,8
 
 
-
-
-
-
 from level import *
+
+
 
 
 
@@ -30,14 +27,12 @@ class Game:
 		self.screen=pg.display.set_mode(self.size)
 		pg.display.set_caption('pokemon maybe')
 		self.running=True
-
 		self.keys=[False]*500
 		self.lastTime=0
 		self.delta=0
 		self.fps=60
 		self.frameTime=1/self.fps
 		self.level=Level(20,50)
-
 
 	def render(self):
 		draw.rect(self.screen,(0,0,0),Rect(0,0,self.size[0],self.size[1]))
