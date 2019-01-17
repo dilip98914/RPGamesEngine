@@ -71,19 +71,29 @@ class Level:
 		self.assetsManager=AssetsManager('playersheet.png')
 		self.tileManager=AssetsManager('tileset.png')
 		self.tiles=self.createTiles()
-		self.entities=self.createEntities(10)
+		self.entity_count=20
+		self.entities=self.createEntities(self.entity_count)
 
 	def createEntities(self,len):
 		entities=[0]*len
 		entities[0]=Player(9,8,(0,0,64,64),self.assetsManager)
-		entities[1]=Mob(10,10,(0,0,64,64),self.assetsManager)
-		for x in range(2,len):
+		# entities[1]=Mob(10,10,(0,0,64,64),self.assetsManager)
+		for x in range(1,len):
 			xx=randrange(int(WIDTH/32))
 			yy=randrange(int(HEIGHT/32))
-			entities[x]=Entity(xx,yy,(0,0,64,64),self.assetsManager)
+			entities[x]=Mob(xx,yy,(0,0,64,64),self.assetsManager)
 		return entities
 
+		if  self.checkCollision(move_x,move_y,entity.bounds):
+				move_x=0
+				move_y=0
 
+	# def check_collision_entities(self):
+	# 	for i1,e1 in enumerate(self.entities):
+	# 		for i2,e2 in enumerate(self.entities):
+	# 			if e1==e2:
+	# 				continue
+	# 			e1.checkCollision(move_x,move_y,entity.bounds):
 
 
 	def add_to_entities(self,entity,index):

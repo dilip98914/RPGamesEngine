@@ -5,6 +5,8 @@ from pygame import *
 from random import randrange
 import time
 import math
+from LevelEditor import *
+
 
 WIDTH=600
 HEIGHT=525
@@ -33,6 +35,8 @@ class Game:
 		self.fps=60
 		self.frameTime=1/self.fps
 		self.level=Level(20,50)
+		self.editor=LevelEditor("hello2")
+		# self.editor.write("hi this is level data")
 
 	def render(self):
 		draw.rect(self.screen,(0,0,0),Rect(0,0,self.size[0],self.size[1]))
