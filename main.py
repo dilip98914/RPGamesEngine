@@ -34,17 +34,19 @@ class Game:
 		self.delta=0
 		self.fps=60
 		self.frameTime=1/self.fps
-		self.level=Level(20,50)
-		self.editor=LevelEditor("hello2")
-		# self.editor.write("hi this is level data")
+		self.level=Level(30,30)
+		self.editor=LevelEditor(self.level.tileManager)
+		self.editor.save('hello123',self.level.tile_id_map)
 
 	def render(self):
 		draw.rect(self.screen,(0,0,0),Rect(0,0,self.size[0],self.size[1]))
 		self.level.render(self.screen)
+		self.editor.render(self.screen)
 		pg.display.update()
 
 	def update(self):
 		self.level.update()
+		self.editor.update(self.level)
 			
 
 		

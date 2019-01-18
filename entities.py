@@ -19,14 +19,25 @@ class Entity:
 		self.x=tile_x*self.size
 		self.y=tile_y*self.size
 		self.bounds=Rect(self.x,self.y,self.size,self.size)
+		self.moveX=0
+		self.moveY=0
+		self.health=0
+		self.inventory=[]
 
-
-	def checkCollision(self,move_x,move_y,target):
-		rect=Rect(self.x+move_x,self.y+move_y,self.size,self.size)
+	def checkCollision(self,target):
+		rect=Rect(self.x+self.moveX,self.y+self.moveY,self.size,self.size)
 		return rect.colliderect(target)
 
 	def update(self,level):
 		self.update_bounds()
+
+	def check_collisions(self,group_entities):
+		for index,entity in enumerate(group_entities):
+			if entity ==self:
+				continue
+			if  self.checkCollision(entity.bounds):
+				self.moveX=0
+				self.moveY=0
 
 	def update_bounds(self):
 		self.bounds=Rect(self.x,self.y,self.size,self.size)
@@ -49,28 +60,19 @@ class Mob(Entity):
 		self.speed=self.default_speed
 		self.boost=False
 
-	def chase(self,x_target,y_target):
-		x_dir=0
-		y_dir=0
+	def dir_by_chase(self,x_target,y_target):
 		xx=x_target-self.x
 		yy=y_target-self.y
 		if xx>0:
-			x_dir=1
-			y_dir=0
+			return(1,0)
 		elif xx<0:
-			x_dir=-1
-			y_dir=0
+			return(-1,0)
 		if yy>0:
-			y_dir=1
-			x_dir=0
-
+			return(0,1)
 		elif yy<0:
-			y_dir=-1
-			x_dir=0
-
-		return(x_dir,y_dir)
-			
-
+			return(0,-1)
+		else:
+			return (0,0)
 
 
 	def update(self,level):
@@ -82,27 +84,26 @@ class Mob(Entity):
 		# 	dx,dy=x_dir,y_dir
 			
 		player=level.entities[0]
-		dx,dy=self.chase(player.x,player.y)
+		dx,dy=self.dir_by_chase(player.x,player.y)
 		
-		dx*=self.speed
-		dy*=self.speed
-		
+		self.moveX=dx*self.speed
+		self.moveY=dy*self.speed
+
 		self.get_frame()
-		self.texture=self.get_animated_texture(dx,dy,self.anim_index)
-	
+		self.texture=self.get_animated_texture(self.moveX,self.moveY,self.anim_index)
 
 		# if random.randint(0,10)>5:
-		self.x+=dx
-		self.y+=dy
+		self.check_collisions(level.entities)
+		self.x+=self.moveX
+		self.y+=self.moveY
 
 		self.update_bounds()
-
 
 
 	def get_frame(self):
 		time_lapse=0
 		if self.boost:
-			time_lapse=5
+			time_lapse=3
 		else:
 			time_lapse=10
 		self.anim_counter+=1
@@ -142,7 +143,7 @@ class Player(Mob):
 	def __init__(self,tile_x,tile_y,source_rect,assetsManager):
 		super().__init__(tile_x,tile_y,source_rect,assetsManager)
 		self.default_speed=3
-		self.boost_speed=self.default_speed*2
+		self.boost_speed=self.default_speed*1.5
 		self.speed=self.default_speed
 
 
@@ -150,34 +151,26 @@ class Player(Mob):
 		dx,dy=direction
 		if key.get_pressed()[K_LSHIFT]:
 			self.boost=True
+
 		self.get_frame()
-		self.texture=self.get_animated_texture(dx,dy,self.anim_index)
 		
-
-
 		if self.boost:
 			self.speed=self.boost_speed
 			self.boost=False
 		else:
 			self.speed=self.default_speed
-		
-		move_x=dx*self.speed
-		move_y=dy*self.speed
+
+		self.moveX=dx*self.speed
+		self.moveY=dy*self.speed
+
+		self.texture=self.get_animated_texture(self.moveX,self.moveY,self.anim_index)
+
+		self.check_collisions(level.entities)
+
+		self.x+=self.moveX
+		self.y+=self.moveY
 
 
-		entities=level.entities
-		for index,entity in enumerate(level.entities):
-			if type(entity).__name__=="Player":
-				continue
-			# if entity ==self:
-			# 	print('checked')
-			if  self.checkCollision(move_x,move_y,entity.bounds):
-				move_x=0
-				move_y=0
-						
-
-		self.x+=move_x
-		self.y+=move_y
 
 	
 

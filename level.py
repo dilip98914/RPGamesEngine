@@ -20,24 +20,37 @@ ORIGIN=(300,250)#center
 from Assets import *
 from entities import *
 
+import pygame as pg
+
 class Camera:
 	def __init__(self):
 		self.offset_x=0
 		self.offset_y=0
 		
-	def update(self,player):
+	def update(self,player,level):
 		x=player.x
 		y=player.y
-		delta_x=x-ORIGIN[0]
-		delta_y=y-ORIGIN[1]
-		self.offset_x=delta_x
-		self.offset_y=delta_y
+		self.offset_x=x-ORIGIN[0]
+		self.offset_y=y-ORIGIN[1]
+		self.check_corners(player,level)
+
+	def check_corners(self,player,level):
+		if player.x<=WIDTH/2:
+			self.offset_x=0
+		elif player.x>=level.w*32-WIDTH/2:
+			self.offset_x=level.w*32-WIDTH
+		if player.y<=HEIGHT/2:
+			self.offset_y=0
+		elif player.y>=level.h*32-HEIGHT/2:
+			self.offset_y=level.h*32-HEIGHT
 
 
 
 class Tile:
-	def __init__(self,tile_x,tile_y,source_rect,ASSETS,solid=False):
+	def __init__(self,tile_x,tile_y,source_rect,ASSETS,solid=False,id=0):
+		self.id=id
 		self.texture=ASSETS.crop(source_rect)
+		self.texture=pg.transform.scale(self.texture,(32,32))
 		self.texture.set_colorkey(BLACK)
 		self.tempRect=self.texture.get_rect()
 		self.size=32
@@ -49,15 +62,7 @@ class Tile:
 
 
 	def render(self,display,off):
-		x0=self.x
-		y0=self.y
-		x1=x0+self.size/2
-		y1=y0+self.size/2
-
-		display.blit(self.texture,(x0-off[0],y0-off[1]))
-		display.blit(self.texture,(x1-off[0],y0-off[1]))
-		display.blit(self.texture,(x1-off[0],y1-off[1]))
-		display.blit(self.texture,(x0-off[0],y1-off[1]))
+		display.blit(self.texture,(self.x-off[0],self.y-off[1]))
 
 
 
@@ -73,6 +78,8 @@ class Level:
 		self.tiles=self.createTiles()
 		self.entity_count=20
 		self.entities=self.createEntities(self.entity_count)
+		self.tile_id_map=self.create2DArray(self.w,self.h)
+		self.fill_tile_map()
 
 	def createEntities(self,len):
 		entities=[0]*len
@@ -88,12 +95,12 @@ class Level:
 				move_x=0
 				move_y=0
 
-	# def check_collision_entities(self):
-	# 	for i1,e1 in enumerate(self.entities):
-	# 		for i2,e2 in enumerate(self.entities):
-	# 			if e1==e2:
-	# 				continue
-	# 			e1.checkCollision(move_x,move_y,entity.bounds):
+	
+	def fill_tile_map(self):
+		for y in range(len(self.tiles)):
+			for x in range(len(self.tiles[0])):
+				self.tile_id_map[y][x]=self.tiles[y][x].id
+			
 
 
 	def add_to_entities(self,entity,index):
@@ -109,12 +116,15 @@ class Level:
 		tiles=self.create2DArray(self.w,self.h)
 		for y in range(self.h):
 			for x in range(self.w):
-				tiles[y][x]=Tile(x,y,(16*4,16*2,16,16),self.tileManager)
+				tiles[y][x]=Tile(x,y,(16*3,16*2,16,16),self.tileManager,id=1)
 
 		return tiles
 
+
+
+
 	def update(self):
-		self.camera.update(self.entities[0])
+		self.camera.update(self.entities[0],self)
 		for i in range(len(self.entities)):
 			self.entities[i].update(self)
 
